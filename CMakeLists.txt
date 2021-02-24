@@ -28,4 +28,3 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 add_executable(raytracer)
 target_sources(raytracer PRIVATE "src/main.cpp" ${SRC_RAYTRACER})
-target_link_libraries(raytracer PRIVATE ${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES} ${OPENGL_LIBRARIES} ${GLM_LIBRARIES})
