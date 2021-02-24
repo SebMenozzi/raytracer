@@ -13,7 +13,7 @@ Developped by <a href="https://twitter.com/sebmzz">Sebastien Menozzi</a>
 
 ## Build
 
-- run **cmakegen.sh**
+- run **./cmakegen.sh**
 
 ## Run
 
