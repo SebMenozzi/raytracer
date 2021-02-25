@@ -1,34 +1,42 @@
 #pragma once
 
-#include "hittable.h"
-#include "utils.h"
-#include "camera.h"
-#include "sphere.h"
 #include "image.h"
-#include "material.h"
-#include "lambertian.h"
-#include "metal.h"
-#include "dielectric.h"
+#include "hittable.h"
+#include "camera.h"
+#include "progress_bar.h"
+#include "aabb.h"
 
 #include <memory>
 #include <vector>
+#include <thread>
+#include <future>
+#include <mutex>
 
-class Scene {
+// Type alias for convinience
+using Objects = std::vector<std::shared_ptr<Hittable>>;
+
+class Scene: public Hittable {
     public:
         Scene(const Camera& camera): _camera(camera) {}
 
-        bool hit(const Ray& ray, hit_record& record) const;
-        Color ray_color(const Ray& ray, int depth);
-        void random();
-        void render(const Image& image, const int samples_per_pixel, const int max_depth);
+        Objects objects() const;
+        void add_object(std::shared_ptr<Hittable> object);
+        void render(const Image& image, const int samples_per_pixel);
+
+        virtual bool hit(const Ray& ray, double t_min, double t_max, hit_record& record) const override;
+        virtual bool bounding_box(AABB& output_box) const override;
 
     private:
         void clear();
-        void add_object(std::shared_ptr<Hittable> object);
+        Color ray_color(const Ray& ray, int depth);
 
-        std::vector<std::shared_ptr<Hittable>> _objects;
+        Objects _objects;
         Camera _camera;
 };
+
+Objects Scene::objects() const {
+    return _objects;
+}
 
 void Scene::clear() {
     _objects.clear();
@@ -37,10 +45,7 @@ void Scene::add_object(std::shared_ptr<Hittable> object) {
     _objects.push_back(object);
 }
 
-bool Scene::hit(const Ray& ray, hit_record& record) const {
-    double t_min = 0.001;
-    double t_max = infinity;
-
+bool Scene::hit(const Ray& ray, double t_min, double t_max, hit_record& record) const {
     hit_record tmp;
     bool has_hit = false;
     auto closest = t_max;
@@ -56,21 +61,41 @@ bool Scene::hit(const Ray& ray, hit_record& record) const {
     return has_hit;
 }
 
+bool Scene::bounding_box(AABB& output_box) const {
+    if (_objects.empty())
+        return false;
+
+    AABB temp_box;
+    bool first_box = true;
+
+    for (const auto& object : _objects) {
+        if (!object->bounding_box(temp_box))
+            return false;
+
+        output_box = first_box ? temp_box : AABB::surrounding_box(output_box, temp_box);
+        first_box = false;
+    }
+
+    return true;
+}
+
 Color Scene::ray_color(const Ray& ray, int depth) {
     hit_record record;
 
     // If we exceed the ray bounce limit, display a black pixel
-    if (depth <= 0)
+    if (depth <= 0) {
         return Color(0, 0, 0);
+    }
 
-    if (hit(ray, record)) {
+    if (hit(ray, 0.001, infinity, record)) {
         Ray scattered;
         Color attenuation;
 
-        if (record.material->scatter(ray, record, attenuation, scattered))
+        if (record.material->scatter(ray, record, attenuation, scattered)) {
             return attenuation * ray_color(scattered, depth - 1);
+        }
 
-        return Color(0, 0, 0);
+        return Color(1, 1, 1);
     }
 
     auto direction = ray.direction();
@@ -80,59 +105,48 @@ Color Scene::ray_color(const Ray& ray, int depth) {
     return Vector3::linear_blend(t, Color(1.0, 1.0, 1.0), Color(0.5, 0.7, 1.0));
 }
 
-void Scene::random() {
-    auto ground_material = std::make_shared<Lambertian>(Color(0.5, 0.5, 0.5));
-    add_object(std::make_shared<Sphere>(Point3D(0, -1000, 0), 1000, ground_material));
+void Scene::render(const Image& image, const int samples_per_pixel) {
+    std::size_t max = image.width() * image.height();
+    std::size_t cores = std::thread::hardware_concurrency();
 
-    for (int x = -2; x < 2; ++x) {
-        for (int y = 0; y < 3; ++y) {
-            auto random_mat = random_double();
-            auto center = Point3D(x + 0.9 * random_double(), 0.2, y + 0.9 * random_double());
+    std::cout << "Threads supported: " << cores << "\n";
 
-            std::shared_ptr<Material> sphere_material;
+    volatile std::atomic<std::size_t> count = 0;
+    std::vector<std::future<void>> futures;
+    auto cout_lock = new std::mutex();
 
-            if (random_mat < 0.8) {
-                // Diffuse
-                auto albedo = Color::random() * Color::random();
-                sphere_material = std::make_shared<Lambertian>(albedo);
-                add_object(std::make_shared<Sphere>(center, 0.2, sphere_material));
-            } else if (random_mat < 0.95) {
-                // Metal
-                auto albedo = Color::random(0.5, 1);
-                auto fuzziness = random_double(0, 0.5);
-                sphere_material = std::make_shared<Metal>(albedo, fuzziness);
-                add_object(std::make_shared<Sphere>(center, 0.2, sphere_material));
-            } else {
-                // Glass
-                sphere_material = std::make_shared<Dielectric>(1.5);
-                add_object(std::make_shared<Sphere>(center, 0.2, sphere_material));
+    auto progress = ProgressBar(std::cout, 100);
+
+    while (cores--)
+    {
+        futures.push_back(std::async(std::launch::async, [=, &image, &progress, &count]() {
+            while (true)
+            {
+                std::size_t index = count++;
+                if (index >= max)
+                    break;
+
+                std::size_t x = index / image.width();
+                std::size_t y = index % image.width();
+
+                auto pixel = image.get_pixel(x, y);
+
+                for (int s = 0; s < samples_per_pixel; ++s) {
+                    auto u = (y + random_double()) / (image.width() - 1);
+                    auto v = (x + random_double()) / (image.height() - 1);
+                    auto ray = _camera.ray(u, v);
+
+                    *pixel += ray_color(ray, 10);
+                }
+
+                {
+                    auto lock = std::lock_guard<std::mutex>(*cout_lock);
+                    progress.write(count / (double) max);
+                }
             }
-        }
+        }));
     }
 
-    auto material1 = std::make_shared<Lambertian>(Color(0.4, 0.2, 0.1));
-    add_object(std::make_shared<Sphere>(Point3D(-2.5, 1, 0), 1.0, material1));
-
-    auto material2 = std::make_shared<Dielectric>(1.5);
-    add_object(std::make_shared<Sphere>(Point3D(0, 1, 0), 1.0, material2));
-
-    auto material3 = std::make_shared<Metal>(Color(0.7, 0.6, 0.5), 0.0);
-    add_object(std::make_shared<Sphere>(Point3D(2.5, 1, 0), 1.0, material3));
-}
-
-void Scene::render(const Image& image, const int samples_per_pixel, const int max_depth) {
-    for (auto i = image.height() - 1; i >= 0; --i) {
-        std::cerr << "\r\033[;32mProgress: " << (image.height() - i) << " / " << image.height() << "\033[0m" << std::flush;
-
-        for (int j = 0; j < image.width(); ++j) {
-            auto pixel_color = image.get_pixel(i, j);
-
-            for (int s = 0; s < samples_per_pixel; ++s) {
-                auto u = (j + random_double()) / (image.width() - 1);
-                auto v = (i + random_double()) / (image.height() - 1);
-                auto ray = _camera.ray(u, v);
-                *pixel_color += ray_color(ray, max_depth);
-            }
-        }
-    }
+    for (auto& future: futures)
+        future.get();
 }

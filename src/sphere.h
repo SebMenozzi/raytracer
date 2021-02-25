@@ -5,6 +5,7 @@
 
 #include "hittable.h"
 #include "vector3.h"
+#include "aabb.h"
 
 class Sphere: public Hittable {
     public:
@@ -13,6 +14,7 @@ class Sphere: public Hittable {
             : _center(center), _radius(radius), _material(material) {};
 
         virtual bool hit(const Ray& ray, double t_min, double t_max, hit_record& record) const override;
+        virtual bool bounding_box(AABB& output_box) const override;
 
     private:
         Point3D _center;
@@ -52,6 +54,15 @@ bool Sphere::hit(const Ray& ray, double t_min, double t_max, hit_record& record)
     auto outward_normal = (record.point - _center) / _radius;
     record.set_face_normal(ray, outward_normal);
     record.material = _material;
+
+    return true;
+}
+
+bool Sphere::bounding_box(AABB& output_box) const {
+    output_box = AABB(
+        _center - Vector3(_radius, _radius, _radius),
+        _center + Vector3(_radius, _radius, _radius)
+    );
 
     return true;
 }

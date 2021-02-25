@@ -17,9 +17,10 @@ class Camera {
             double aperture,
             double focus_distance
         ) {
-            auto theta = degrees_to_radians(fov);
-            auto h = std::tan(theta / 2);
-            auto viewport_height = 2.0 * h;
+            // http://ogldev.atspace.co.uk/www/tutorial12/tutorial12.html
+            auto alpha = degrees_to_radians(fov / 2);
+            auto vertical_distance = std::tan(alpha);
+            auto viewport_height = 2.0 * vertical_distance;
             auto viewport_width = aspect_ratio * viewport_height;
 
             _w = (lookfrom - lookat).unit_vector();

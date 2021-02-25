@@ -6,60 +6,63 @@
 
 class Vector3
 {
-public:
-    Vector3(): _data{0, 0, 0} {}
+    public:
+        Vector3(): _data{0, 0, 0} {}
 
-    Vector3(const double x, const double y, const double z) {
-        _data[0] = x;
-        _data[1] = y;
-        _data[2] = z;
-    }
+        Vector3(const double x, const double y, const double z) {
+            _data[0] = x;
+            _data[1] = y;
+            _data[2] = z;
+        }
 
-    inline double x() const { return _data[0]; }
-    inline double y() const { return _data[1]; }
-    inline double z() const { return _data[2]; }
+        inline double x() const { return _data[0]; }
+        inline double y() const { return _data[1]; }
+        inline double z() const { return _data[2]; }
 
-    inline Vector3 operator-() const {
-        return Vector3(-x(), -y(), -z());
-    }
+        inline Vector3 operator-() const {
+            return Vector3(-x(), -y(), -z());
+        }
 
-    inline bool operator==(const Vector3 &v) {
-        return (x() == v.x() && y() == v.y() && z() == v.z());
-    }
+        inline double operator[](std::size_t i) const { return _data[i]; }
+    	inline double& operator[](std::size_t i) { return _data[i]; };
 
-    // ?= operator with vector
-    inline Vector3& operator+=(const Vector3 &v);
-	inline Vector3& operator-=(const Vector3 &v);
-	inline Vector3& operator*=(const Vector3 &v);
-	inline Vector3& operator/=(const Vector3 &v);
+        inline bool operator==(const Vector3 &v) {
+            return (x() == v.x() && y() == v.y() && z() == v.z());
+        }
 
-    // ?= operator with scalar
-    inline Vector3& operator+=(const double e);
-	inline Vector3& operator-=(const double e);
-	inline Vector3& operator*=(const double e);
-	inline Vector3& operator/=(const double e);
+        // ?= operator with vector
+        inline Vector3& operator+=(const Vector3 &v);
+    	inline Vector3& operator-=(const Vector3 &v);
+    	inline Vector3& operator*=(const Vector3 &v);
+    	inline Vector3& operator/=(const Vector3 &v);
 
-    // Other useful methods
-    inline double squared_length() const;
-    inline double length() const;
-    inline Vector3 unit_vector() const;
-    inline bool near_zero() const;
+        // ?= operator with scalar
+        inline Vector3& operator+=(const double e);
+    	inline Vector3& operator-=(const double e);
+    	inline Vector3& operator*=(const double e);
+    	inline Vector3& operator/=(const double e);
 
-    // Static methods
-    inline static double dot_product(const Vector3 &v1, const Vector3 &v2);
-    inline static Vector3 cross_product(const Vector3 &v1, const Vector3 &v2);
-    inline static Vector3 random();
-    inline static Vector3 random(double min, double max);
-    inline static Vector3 random_in_unit_sphere();
-    inline static Vector3 random_in_unit_disk();
-    inline static Vector3 random_unit_vector();
-    inline static Vector3 random_in_hemisphere(const Vector3& normal);
-    inline static Vector3 reflect(const Vector3& vector, const Vector3& normal);
-    inline static Vector3 refract(const Vector3& uv, const Vector3& normal, double refraction_ratio);
-    inline static Vector3 linear_blend(double t, Vector3 start, Vector3 end);
+        // Other useful methods
+        inline double squared_length() const;
+        inline double length() const;
+        inline Vector3 unit_vector() const;
+        inline bool near_zero() const;
 
-private:
-    double _data[3];
+        // Static methods
+        inline static double dot_product(const Vector3 &v1, const Vector3 &v2);
+        inline static Vector3 cross_product(const Vector3 &v1, const Vector3 &v2);
+        inline static Vector3 random();
+        inline static Vector3 random(double min, double max);
+        inline static Vector3 random_in_unit_sphere();
+        inline static Vector3 random_in_unit_disk();
+        inline static Vector3 random_unit_vector();
+        inline static Vector3 random_in_hemisphere(const Vector3& normal);
+        inline static Vector3 reflect(const Vector3& vector, const Vector3& normal);
+        inline static Vector3 refract(const Vector3& uv, const Vector3& normal, double refraction_ratio);
+        inline static Vector3 linear_blend(double t, Vector3 start, Vector3 end);
+
+    private:
+        double _data[3];
 };
 
 // Type aliases for convinience

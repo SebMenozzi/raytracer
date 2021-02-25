@@ -5,6 +5,7 @@
 #include "ray.h"
 #include "vector3.h"
 #include "material.h"
+#include "aabb.h"
 
 struct hit_record {
     Point3D point;
@@ -22,4 +23,5 @@ struct hit_record {
 class Hittable {
     public:
         virtual bool hit(const Ray& ray, double t_min, double t_max, hit_record& record) const = 0;
+        virtual bool bounding_box(AABB& output_box) const = 0;
 };
