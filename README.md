@@ -5,7 +5,7 @@ Inspired by <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.h
 Developped by <a href="https://twitter.com/sebmzz">Sebastien Menozzi</a>
 
 ## Screenshots
-[<img src="https://raw.githubusercontent.com/SebMenozzi/raytracer/master/static/image.jpg" align="center" width="400" hspace="2" vspace="10">](hhttps://raw.githubusercontent.com/SebMenozzi/raytracer/master/static/image.jpg)
+[<img src="https://raw.githubusercontent.com/SebMenozzi/raytracer/master/static/image.jpg" align="center" width="600" hspace="2" vspace="10">](hhttps://raw.githubusercontent.com/SebMenozzi/raytracer/master/static/image.jpg)
 
 ## Dependencies
 
