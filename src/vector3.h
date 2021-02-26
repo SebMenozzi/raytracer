@@ -55,7 +55,6 @@ class Vector3
         inline static Vector3 random(double min, double max);
         inline static Vector3 random_in_unit_sphere();
         inline static Vector3 random_in_unit_disk();
-        inline static Vector3 random_unit_vector();
         inline static Vector3 random_in_hemisphere(const Vector3& normal);
         inline static Vector3 reflect(const Vector3& vector, const Vector3& normal);
         inline static Vector3 refract(const Vector3& uv, const Vector3& normal, double refraction_ratio);
@@ -204,30 +203,17 @@ inline Vector3 Vector3::random(double min, double max) {
     );
 }
 inline Vector3 Vector3::random_in_unit_sphere() {
-    while (true) {
-        auto p = Vector3::random(-1, 1);
+    auto p = Vector3::random(-1, 1);
 
-        if (p.squared_length() >= 1)
-            continue;
-
-        return p;
-    }
+    return p.unit_vector();
 }
+
 inline Vector3 Vector3::random_in_unit_disk() {
-    while (true) {
-        auto p = Vector3(random_double(-1, 1), random_double(-1, 1), 0);
+    auto p = Vector3(random_double(-1, 1), random_double(-1, 1), 0);
 
-        if (p.squared_length() >= 1)
-            continue;
-
-        return p;
-    }
+    return p.unit_vector();
 }
-inline Vector3 Vector3::random_unit_vector() {
-    auto vec = Vector3::random_in_unit_sphere();
 
-    return vec.unit_vector();
-}
 inline Vector3 Vector3::random_in_hemisphere(const Vector3& normal) {
     auto in_unit_sphere = random_in_unit_sphere();
 

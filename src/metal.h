@@ -11,12 +11,12 @@ class Metal: public Material {
 
         virtual bool scatter(const Ray& ray, const hit_record& record, Color& attenuation, Ray& scattered) const override {
             auto direction = ray.direction();
-            auto unit_direction = direction.unit_vector();
-            auto reflected = Vector3::reflect(unit_direction, record.normal);
-            scattered = Ray(record.point, reflected + _fuzziness * Vector3::random_in_unit_sphere());
+            auto reflected = Vector3::reflect(ray.direction(), record.normal);
+            auto scatter_direction = (reflected + _fuzziness * Vector3::random_in_unit_sphere()).unit_vector();
+            scattered = Ray(record.point, scatter_direction);
             attenuation = _albedo;
 
-            return (Vector3::dot_product(scattered.direction(), record.normal) > 0);
+            return true;
         }
 
     private:

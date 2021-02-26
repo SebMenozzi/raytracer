@@ -14,17 +14,17 @@ class Dielectric: public Material {
             attenuation = Color(1.0, 1.0, 1.0);
 
             auto refraction_ratio = record.front_face ? (1.0 / _index_of_refraction) : _index_of_refraction;
-            auto unit_direction = ray.direction().unit_vector();
-            double cos_theta = std::fmin(Vector3::dot_product(-unit_direction, record.normal), 1.0);
+
+            double cos_theta = std::fmin(Vector3::dot_product(-ray.direction(), record.normal), 1.0);
             double sin_theta = std::sqrt(1.0 - cos_theta * cos_theta);
 
             bool cannot_refract = refraction_ratio * sin_theta > 1.0;
             Vector3 direction;
 
             if (cannot_refract || reflectance(cos_theta, refraction_ratio) > random_double())
-                direction = Vector3::reflect(unit_direction, record.normal);
+                direction = Vector3::reflect(ray.direction(), record.normal).unit_vector();
             else
-                direction = Vector3::refract(unit_direction, record.normal, refraction_ratio);
+                direction = Vector3::refract(ray.direction(), record.normal, refraction_ratio).unit_vector();
 
             scattered = Ray(record.point, direction);
 

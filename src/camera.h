@@ -14,7 +14,6 @@ class Camera {
             Vector3 up,
             double fov,
             double aspect_ratio,
-            double aperture,
             double focus_distance
         ) {
             // http://ogldev.atspace.co.uk/www/tutorial12/tutorial12.html
@@ -33,8 +32,6 @@ class Camera {
             _horizontal = focus_distance * viewport_width * _u;
             _vertical = focus_distance * viewport_height * _v;
             _lower_left_corner = _origin - _horizontal / 2 - _vertical / 2 - focus_distance * _w;
-
-            _lens_radius = aperture / 2;
         }
 
         Ray ray(double s, double t) const;
@@ -47,15 +44,11 @@ class Camera {
         Vector3 _u;
         Vector3 _v;
         Vector3 _w;
-        double _lens_radius;
 };
 
 Ray Camera::ray(double s, double t) const {
-    auto radius = _lens_radius * Vector3::random_in_unit_disk();
-    auto offset = _u * radius.x() + _v * radius.y();
-
     return Ray(
-        _origin + offset,
-        _lower_left_corner + s * _horizontal + t * _vertical - _origin - offset
+        _origin,
+        (_lower_left_corner + s * _horizontal + t * _vertical - _origin).unit_vector()
     );
 }

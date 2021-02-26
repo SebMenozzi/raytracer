@@ -25,8 +25,8 @@ Scene random_scene(const Camera& camera) {
     main_scene.add_object(std::make_shared<BVHNode>(ground_scene));
 
     auto small_balls_scene = Scene(camera);
-    for (int x = -8; x < 8; ++x) {
-        for (int y = -8; y < 8; ++y) {
+    for (int x = -4; x < 4; ++x) {
+        for (int y = -4; y < 4; ++y) {
             auto random_mat = random_double();
             auto center = Point3D(x + 0.9 * random_double(), 0.2, y + 0.9 * random_double());
 
@@ -91,7 +91,6 @@ int main(int argc, char *argv[]) {
         auto lookat = Point3D(0, 0, 0);
         auto up = Vector3(0, 1, 0);
         auto fov = 20.0;
-        auto aperture = 0.1;
         auto focus_distance = 10.0;
 
         auto camera = Camera(
@@ -100,7 +99,6 @@ int main(int argc, char *argv[]) {
             up,
             fov,
             aspect_ratio,
-            aperture,
             focus_distance
         );
 

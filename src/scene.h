@@ -5,6 +5,7 @@
 #include "camera.h"
 #include "progress_bar.h"
 #include "aabb.h"
+#include "macro.h"
 
 #include <memory>
 #include <vector>
@@ -82,9 +83,9 @@ bool Scene::bounding_box(AABB& output_box) const {
 Color Scene::ray_color(const Ray& ray, int depth) {
     hit_record record;
 
-    // If we exceed the ray bounce limit, display a black pixel
+    // If we exceed the ray bounce limit
     if (depth <= 0) {
-        return Color(0, 0, 0);
+        return Color(1.0, 1.0, 1.0);
     }
 
     if (hit(ray, 0.001, infinity, record)) {
@@ -95,58 +96,74 @@ Color Scene::ray_color(const Ray& ray, int depth) {
             return attenuation * ray_color(scattered, depth - 1);
         }
 
-        return Color(1, 1, 1);
+        return Color(0, 0, 0);
     }
 
-    auto direction = ray.direction();
-    auto unit_direction = direction.unit_vector();
-    auto t = 0.5 * (unit_direction.y() + 1.0);
+    auto t = 0.5 * ray.direction().y();
 
-    return Vector3::linear_blend(t, Color(1.0, 1.0, 1.0), Color(0.5, 0.7, 1.0));
+    return Vector3::linear_blend(t, Color(0.8, 0.8, 1.0), Color(0.5, 0.7, 1.0));
 }
 
 void Scene::render(const Image& image, const int samples_per_pixel) {
-    std::size_t max = image.width() * image.height();
-    std::size_t cores = std::thread::hardware_concurrency();
-
-    std::cout << "Threads supported: " << cores << "\n";
-
-    volatile std::atomic<std::size_t> count = 0;
-    std::vector<std::future<void>> futures;
-    auto cout_lock = new std::mutex();
-
-    auto progress = ProgressBar(std::cout, 100);
-
-    while (cores--)
-    {
-        futures.push_back(std::async(std::launch::async, [=, &image, &progress, &count]() {
-            while (true)
-            {
-                std::size_t index = count++;
-                if (index >= max)
-                    break;
-
-                std::size_t x = index / image.width();
-                std::size_t y = index % image.width();
-
-                auto pixel = image.get_pixel(x, y);
+    // Without multi-threading, very slow but easy to debug
+    #if (DEBUG == 1)
+        for (auto i = image.height() - 1; i >= 0; --i) {
+            for (int j = 0; j < image.width(); ++j) {
+                auto pixel = image.get_pixel(i, j);
 
                 for (int s = 0; s < samples_per_pixel; ++s) {
-                    auto u = (y + random_double()) / (image.width() - 1);
-                    auto v = (x + random_double()) / (image.height() - 1);
+                    auto u = (j + random_double()) / (image.width() - 1);
+                    auto v = (i + random_double()) / (image.height() - 1);
                     auto ray = _camera.ray(u, v);
 
                     *pixel += ray_color(ray, 10);
                 }
-
-                {
-                    auto lock = std::lock_guard<std::mutex>(*cout_lock);
-                    progress.write(count / (double) max);
-                }
             }
-        }));
-    }
+        }
+    // With multi-threading, essential for rendering otherwise you'll get bored quickly
+    #else
+        std::size_t max = image.width() * image.height();
+        std::size_t cores = std::thread::hardware_concurrency();
 
-    for (auto& future: futures)
-        future.get();
+        std::cout << "Threads supported: " << cores << "\n";
+
+        volatile std::atomic<std::size_t> count = 0;
+        std::vector<std::future<void>> futures;
+        auto cout_lock = new std::mutex();
+
+        auto progress = ProgressBar(std::cout, 100);
+
+        while (cores--)
+        {
+            futures.push_back(std::async(std::launch::async, [=, &image, &progress, &count]() {
+                while (true)
+                {
+                    std::size_t index = count++;
+                    if (index >= max)
+                        break;
+
+                    std::size_t x = index / image.width();
+                    std::size_t y = index % image.width();
+
+                    auto pixel = image.get_pixel(x, y);
+
+                    for (int s = 0; s < samples_per_pixel; ++s) {
+                        auto u = (y + random_double()) / (image.width() - 1);
+                        auto v = (x + random_double()) / (image.height() - 1);
+                        auto ray = _camera.ray(u, v);
+
+                        *pixel += ray_color(ray, 10);
+                    }
+
+                    {
+                        auto lock = std::lock_guard<std::mutex>(*cout_lock);
+                        progress.write(count / (double) max);
+                    }
+                }
+            }));
+        }
+
+        for (auto& future: futures)
+            future.get();
+    #endif
 }
