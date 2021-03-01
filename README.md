@@ -7,7 +7,7 @@ Developped by <a href="https://twitter.com/sebmzz">Sebastien Menozzi</a>
 ## Screenshots
 [<img src="https://raw.githubusercontent.com/SebMenozzi/raytracer/master/static/image_high.jpg" align="center" width="600" hspace="2" vspace="10">](hhttps://raw.githubusercontent.com/SebMenozzi/raytracer/master/static/image_high.jpg)
 
-## Dependencies
+## Install
 
 - Install CMake => https://cmake.org/
 
@@ -25,6 +25,10 @@ To run the tests:
 - run **./build/raytracer tests**
 
 You're all set, have fun!
+
+## Dependencies
+
+https://github.com/tinyobjloader/tinyobjloader/blob/master/tiny_obj_loader.h
 
 ## License
 

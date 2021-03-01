@@ -3,23 +3,23 @@
 
 #include "tests.h"
 
-#include "camera.h"
-#include "scene.h"
-#include "bvh_node.h"
+#include "scene/camera.h"
+#include "scene/scene.h"
+#include "utils/image.h"
 
-#include "sphere.h"
-#include "image.h"
+#include "object/bvh_node.h"
+#include "object/sphere.h"
 
-#include "material.h"
-#include "lambertian.h"
-#include "metal.h"
-#include "dielectric.h"
+#include "material/material.h"
+#include "material/lambertian.h"
+#include "material/metal.h"
+#include "material/dielectric.h"
 
 Scene random_scene(const Camera& camera) {
     auto main_scene = Scene(camera);
 
     auto ground_scene = Scene(camera);
-    auto ground_material = std::make_shared<Lambertian>(Color(0.5, 0.5, 0.5));
+    auto ground_material = std::make_shared<Lambertian>(Color(0.5, 0.5, 0.6));
     ground_scene.add_object(std::make_shared<Sphere>(Point3D(0, -1000, 0), 1000, ground_material));
 
     main_scene.add_object(std::make_shared<BVHNode>(ground_scene));
@@ -54,7 +54,7 @@ Scene random_scene(const Camera& camera) {
 
     auto big_balls_scene = Scene(camera);
 
-    auto material1 = std::make_shared<Lambertian>(Color(0.4, 0.2, 0.1));
+    auto material1 = std::make_shared<Lambertian>(Color(0.8, 0.2, 0.1));
     big_balls_scene.add_object(std::make_shared<Sphere>(Point3D(-4, 1, 0), 1.0, material1));
 
     auto material2 = std::make_shared<Dielectric>(1.5);

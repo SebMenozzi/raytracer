@@ -1,11 +1,11 @@
 #pragma once
 
-#include "image.h"
-#include "hittable.h"
-#include "camera.h"
-#include "progress_bar.h"
-#include "aabb.h"
-#include "macro.h"
+#include "object/hittable.h"
+#include "object/aabb.h"
+#include "scene/camera.h"
+#include "utils/image.h"
+#include "utils/progress_bar.h"
+#include "utils/macro.h"
 
 #include <memory>
 #include <vector>
@@ -112,8 +112,8 @@ void Scene::render(const Image& image, const int samples_per_pixel) {
                 auto pixel = image.get_pixel(i, j);
 
                 for (int s = 0; s < samples_per_pixel; ++s) {
-                    auto u = (j + random_double()) / (image.width() - 1);
-                    auto v = (i + random_double()) / (image.height() - 1);
+                    auto u = (j + random_double()) / image.width();
+                    auto v = (i + random_double()) / image.height();
                     auto ray = _camera.ray(u, v);
 
                     *pixel += ray_color(ray, 10);

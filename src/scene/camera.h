@@ -2,9 +2,9 @@
 
 #include <cmath>
 
-#include "vector3.h"
-#include "ray.h"
-#include "utils.h"
+#include "utils/vector3.h"
+#include "utils/utils.h"
+#include "object/ray.h"
 
 class Camera {
     public:

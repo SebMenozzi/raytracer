@@ -1,8 +1,8 @@
 #pragma once
 
-#include "material.h"
-#include "vector3.h"
-#include "ray.h"
+#include "material/material.h"
+#include "utils/vector3.h"
+#include "object/ray.h"
 
 class Metal: public Material {
     public:

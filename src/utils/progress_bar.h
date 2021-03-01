@@ -4,7 +4,7 @@
 #include <string>
 #include <chrono>
 
-#include "utils.h"
+#include "utils/utils.h"
 
 class ProgressBar
 {

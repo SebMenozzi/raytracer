@@ -2,7 +2,7 @@
 
 #include <cmath>
 #include <iostream>
-#include "utils.h"
+#include "utils/utils.h"
 
 class Vector3
 {

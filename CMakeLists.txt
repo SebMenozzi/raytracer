@@ -4,9 +4,7 @@ set(OPT_FLAGS, "-Ofast")
 
 # SOURCES :
 # Put all your sources here EXCEPT YOUR MAIN.CPP
-set(SRC_RAYTRACER
-    src/tests.cpp
-)
+set(SRC_RAYTRACER)
 
 # Directories containing headers must be specified in the include_directories()
 include_directories(src)

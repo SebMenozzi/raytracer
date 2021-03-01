@@ -1,9 +1,9 @@
 #pragma once
 
-#include "material.h"
-#include "vector3.h"
-#include "ray.h"
-#include "utils.h"
+#include "object/ray.h"
+#include "material/material.h"
+#include "utils/utils.h"
+#include "utils/vector3.h"
 
 class Dielectric: public Material {
     public:

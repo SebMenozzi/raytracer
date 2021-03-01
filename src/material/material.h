@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ray.h"
+#include "object/ray.h"
 
 struct hit_record;
 

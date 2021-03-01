@@ -2,10 +2,10 @@
 
 #include <memory>
 
-#include "ray.h"
-#include "vector3.h"
-#include "material.h"
-#include "aabb.h"
+#include "object/ray.h"
+#include "object/aabb.h"
+#include "utils/vector3.h"
+#include "material/material.h"
 
 struct hit_record {
     Point3D point;

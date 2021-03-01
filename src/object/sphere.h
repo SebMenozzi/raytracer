@@ -4,10 +4,11 @@
 #include <cmath>
 #include <memory>
 
-#include "hittable.h"
-#include "vector3.h"
-#include "aabb.h"
-#include "macro.h"
+#include "object/hittable.h"
+#include "object/aabb.h"
+#include "material/material.h"
+#include "utils/vector3.h"
+#include "utils/macro.h"
 
 class Sphere: public Hittable {
     public:

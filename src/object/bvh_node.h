@@ -2,9 +2,9 @@
 
 #include <algorithm>
 
-#include "hittable.h"
-#include "utils.h"
-#include "scene.h"
+#include "object/hittable.h"
+#include "utils/utils.h"
+#include "scene/scene.h"
 
 class BVHNode: public Hittable {
     public:
